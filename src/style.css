@@ -1,0 +1,168 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@layer base { * { box-sizing: border-box; } body { margin: 0; min-width: 320px; font-family: Inter, "Microsoft YaHei", system-ui, sans-serif; background: #f8f7ff; } button, select, input, textarea { font: inherit; } }
+@layer components { .panel { @apply rounded-3xl border border-violet-100 bg-white p-5 shadow-[0_12px_35px_rgba(95,72,170,.07)]; } .field { @apply flex flex-col gap-2 text-sm font-medium text-violet-950; } .field select, .field input, .field textarea { @apply w-full rounded-xl border border-violet-200 bg-violet-50/60 px-3 py-2.5 text-violet-950 outline-none placeholder:text-violet-300 focus:border-violet-500 focus:ring-2 focus:ring-violet-100; } }
+
+/* 银白金属 + 毛玻璃拟态主题：只影响视觉层，不改变页面数据与交互。 */
+body {
+  background:
+    radial-gradient(ellipse at top left, #f8fafc 0%, rgba(226,232,240,.76) 42%, rgba(243,232,255,.52) 100%);
+}
+
+main {
+  background:
+    radial-gradient(ellipse at top left, #f8fafc 0%, rgba(226,232,240,.66) 48%, rgba(243,232,255,.46) 100%) !important;
+}
+
+main::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: .55;
+  background-image: linear-gradient(115deg, transparent 0 42%, rgba(255,255,255,.75) 50%, transparent 58%);
+  background-size: 220% 100%;
+}
+
+/* 所有承载内容的白色容器统一为钛银毛玻璃。 */
+main .bg-white,
+main .bg-white\/70 {
+  background-color: rgba(255,255,255,.42) !important;
+  backdrop-filter: blur(20px) saturate(135%);
+  -webkit-backdrop-filter: blur(20px) saturate(135%);
+  border-color: rgba(255,255,255,.82) !important;
+  box-shadow: 0 8px 32px 0 rgba(31,38,135,.07) !important;
+}
+
+main .rounded-3xl.border,
+main .rounded-2xl.border,
+main .panel {
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow .3s ease, border-color .3s ease, transform .3s ease;
+}
+
+main .rounded-3xl.border::before,
+main .rounded-2xl.border::before,
+main .panel::before {
+  content: "";
+  position: absolute;
+  width: 12rem;
+  height: 12rem;
+  top: -6rem;
+  right: -6rem;
+  border-radius: 9999px;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgba(168,85,247,.18), transparent 65%);
+  filter: blur(18px);
+}
+
+main .rounded-3xl.border:hover,
+main .rounded-2xl.border:hover,
+main .panel:hover {
+  border-color: rgba(216,180,254,.8) !important;
+  box-shadow: 0 12px 40px 0 rgba(139,92,246,.18) !important;
+}
+
+/* 标题数字采用铬银到电紫的金属渐变。 */
+main h1,
+main h2,
+main .text-3xl.font-bold,
+main .text-4xl.font-bold,
+main .text-xl.font-bold {
+  background: linear-gradient(100deg, #0f172a 0%, #4c1d95 48%, #1e293b 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* 黑紫金属按钮 + 扫光。 */
+main button.bg-violet-600,
+main button[class*="bg-violet-600"] {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(90deg, #0f172a, #4c1d95, #0f172a) !important;
+  color: white !important;
+  border: 1px solid rgba(168,85,247,.38) !important;
+  box-shadow: 0 8px 20px rgba(76,29,149,.2) !important;
+}
+
+main button.bg-violet-600::after,
+main button[class*="bg-violet-600"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 25%, rgba(255,255,255,.28) 50%, transparent 75%);
+  transform: translateX(-120%);
+  transition: transform 900ms ease;
+}
+
+main button.bg-violet-600:hover::after,
+main button[class*="bg-violet-600"]:hover::after { transform: translateX(120%); }
+
+main button.bg-violet-600 > *,
+main button[class*="bg-violet-600"] > * { position: relative; z-index: 1; }
+
+main input, main select, main textarea {
+  background: rgba(248,250,252,.7) !important;
+  border-color: rgba(196,181,253,.7) !important;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.8);
+}
+
+main input:focus, main select:focus, main textarea:focus {
+  border-color: #a855f7 !important;
+  box-shadow: 0 0 0 3px rgba(168,85,247,.12), inset 0 1px 1px rgba(255,255,255,.8) !important;
+}
+
+/* 雷达图轴线转为钛银，数据面保留电光紫。 */
+main svg g[stroke] { stroke: #3f3f46; opacity: .54; }
+main svg polygon[fill] { fill: rgba(139,92,246,.35); stroke: #a855f7; }
+
+.metal-card, .player-card { background: rgba(255,255,255,.44); border: 1px solid rgba(255,255,255,.88); backdrop-filter: blur(22px); box-shadow: 0 10px 35px rgba(31,38,135,.09); border-radius: 1.5rem; transition: .3s ease; }
+.metal-card:hover, .player-card:hover { border-color: rgba(250,204,21,.7); box-shadow: 0 15px 42px rgba(139,92,246,.19); }
+.metal-button { position: relative; overflow: hidden; border-radius: .85rem; padding: .8rem 1.15rem; color: white; font-weight: 800; background: linear-gradient(100deg,#101827,#5b21b6,#1e1b4b); border: 1px solid rgba(250,204,21,.38); box-shadow: 0 8px 22px rgba(76,29,149,.26); }
+.metal-button::after { content:""; position:absolute; inset:0; background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.3),transparent 70%); transform:translateX(-120%); transition:transform .8s; }.metal-button:hover::after{transform:translateX(120%)}
+.nav-button { display:flex; width:100%; align-items:center; gap:.8rem; border-radius:.9rem; padding:.85rem 1rem; color:#6d5aaa; font-weight:700; transition:.25s; }.nav-button:hover{background:rgba(250,204,21,.13);color:#4c1d95}.nav-active{background:linear-gradient(90deg,#ede9fe,rgba(254,249,195,.55));color:#4c1d95;box-shadow:inset 3px 0 #a855f7}
+.chrome-title { background:linear-gradient(100deg,#111827 0%,#4c1d95 45%,#1f2937 100%);-webkit-background-clip:text;background-clip:text;color:transparent; }.yellow-tag{display:inline-block;border-radius:999px;background:rgba(254,249,195,.9);border:1px solid rgba(250,204,21,.45);padding:.35rem .7rem;color:#a16207;font-size:.75rem;font-weight:800}.stat-tile{border-radius:1rem;background:rgba(237,233,254,.52);padding:1rem}.stat-tile p{font-size:.75rem;color:#7c3aed}.stat-tile b{display:block;margin-top:.35rem;font-size:1.3rem}.scroll-row{display:flex;gap:1.25rem;overflow-x:auto;padding:0 0 1rem;scroll-snap-type:x mandatory}.player-card{display:block;flex:0 0 min(350px,78vw);overflow:hidden;appearance:none;padding:0;text-align:left;scroll-snap-align:start}.player-portrait{display:block;height:calc(25rem + 2rem);width:100%;margin-top:-2rem;overflow:hidden}.player-portrait img{display:block;height:100%;width:100%;object-fit:cover;object-position:top;transition:transform .45s ease}.player-card:hover .player-portrait img{transform:scale(1.035)}
+.rank-slider{position:relative;display:flex;width:100%;align-items:center;gap:.75rem;border-radius:.9rem;background:rgba(255,255,255,.48);padding:.85rem;transition:transform .22s ease,box-shadow .22s ease,background .22s ease}.rank-slider:hover{z-index:2;transform:scale(1.045);background:rgba(255,255,255,.82);box-shadow:0 12px 24px rgba(91,33,182,.17)}.rank-champion{border:1px solid rgba(250,204,21,.72);background:linear-gradient(105deg,rgba(254,249,195,.88),rgba(255,255,255,.78),rgba(237,233,254,.8));box-shadow:0 6px 20px rgba(250,204,21,.16)}.rank-champion:hover{box-shadow:0 15px 30px rgba(250,204,21,.3)}.champion-mark{border-radius:999px;background:#facc15;padding:.18rem .42rem;font-size:.65rem;font-weight:900;color:#713f12}
+.archive-search{width:min(280px,80vw);border:1px solid rgba(196,181,253,.7);border-radius:.85rem;background:rgba(255,255,255,.55);padding:.6rem 2.25rem .6rem .8rem;outline:none}.archive-search:focus{border-color:#a855f7;box-shadow:0 0 0 3px rgba(168,85,247,.12)}.batch-modal{width:min(1120px,96vw);max-height:88vh;overflow:auto;padding:1.75rem}.table-wrap{overflow-x:auto;border:1px solid rgba(221,214,254,.9);border-radius:1rem;background:rgba(255,255,255,.42)}.table-wrap table{width:100%;min-width:800px;border-collapse:separate;border-spacing:0}.table-wrap th{padding:.75rem;text-align:left;font-size:.75rem;color:#6d28d9;background:rgba(237,233,254,.65)}.table-wrap td{padding:.55rem;border-top:1px solid rgba(221,214,254,.65)}.table-wrap select,.table-wrap input,.batch-link{width:100%;border:1px solid rgba(196,181,253,.65);border-radius:.6rem;background:rgba(255,255,255,.7);padding:.5rem;outline:none}.table-wrap select:focus,.table-wrap input:focus,.batch-link:focus{border-color:#a855f7;box-shadow:0 0 0 2px rgba(168,85,247,.12)}.remove-row{display:grid;height:1.85rem;width:1.85rem;place-items:center;border-radius:.5rem;background:#fef2f2;color:#dc2626;font-size:1.3rem}.remove-row:disabled{opacity:.35}.add-row{border:1px dashed rgba(139,92,246,.55);border-radius:.7rem;padding:.55rem .9rem;color:#6d28d9;font-weight:800}.add-row:hover{background:rgba(237,233,254,.7)}.batch-link{min-height:2.75rem}
+.record-page{position:fixed;z-index:8;top:0;right:0;bottom:0;left:18rem;overflow:auto;padding:7.5rem 2.5rem 3rem;background:linear-gradient(135deg,rgba(248,250,252,.96),rgba(237,233,254,.8),rgba(254,249,195,.45))}.record-page .batch-modal{position:relative;width:100%;max-width:1260px;max-height:none;margin:auto}.record-page::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 85% 10%,rgba(250,204,21,.18),transparent 24%)}@media(max-width:1023px){.record-page{left:0;padding:5.5rem 1rem 2rem}}
+.quick-form{width:min(560px,94vw);padding:1.5rem}.quick-form select,.quick-form input{width:100%;border:1px solid rgba(196,181,253,.7);border-radius:.7rem;background:rgba(255,255,255,.76);padding:.7rem;outline:none}.quick-form select:focus,.quick-form input:focus{border-color:#a855f7;box-shadow:0 0 0 3px rgba(168,85,247,.12)}
+.score-import-action{position:fixed;z-index:12;top:2rem;right:3rem}.score-import-button{display:inline-flex;align-items:center;gap:.5rem;border:1px solid #d1d5db;border-radius:.7rem;background:rgba(255,255,255,.9);padding:.7rem 1rem;color:#475569;font-size:.875rem;font-weight:800;box-shadow:0 4px 12px rgba(71,85,105,.1)}.score-import-button:hover:not(:disabled){border-color:#a855f7;background:#faf5ff;color:#6d28d9}.score-import-button:disabled{opacity:.65;cursor:wait}.score-import-error{margin-top:.5rem;max-width:18rem;border-radius:.5rem;background:#fef2f2;padding:.5rem;color:#b91c1c;font-size:.75rem}@media(max-width:1023px){.score-import-action{top:1rem;right:1rem}}
+/* 排行榜采用与队员档案一致的横向长卡展示。 */
+main div:has(> .metal-card .rank-slider) { display:flex; gap:1.25rem; overflow-x:auto; padding:0 0 1rem; scroll-snap-type:x mandatory; }
+main .metal-card:has(.rank-slider) { flex:0 0 min(620px,88vw); min-height:430px; scroll-snap-align:start; }
+main .metal-card:has(.rank-slider) .rank-slider { min-height:4.4rem; }
+.rank-table{border-top:1px solid rgba(221,214,254,.8)}.rank-head,.rank-total-row{display:grid;grid-template-columns:90px minmax(220px,1fr) 150px 120px 150px;align-items:center;gap:1rem;padding:1rem 1.5rem;text-align:left}.rank-head{background:rgba(237,233,254,.55);color:#6d28d9;font-size:.8rem;font-weight:900}.rank-total-row{width:100%;border-top:1px solid rgba(237,233,254,.65);transition:.2s}.rank-total-row:hover{background:rgba(250,245,255,.8);transform:scale(1.01)}.rank-total-row i{display:grid;height:2.5rem;width:2.5rem;place-items:center;border-radius:999px;background:#ddd6fe;color:#6d28d9;font-style:normal;font-weight:900}@media(max-width:700px){.rank-head,.rank-total-row{grid-template-columns:45px minmax(150px,1fr) 85px 60px 80px;padding:1rem;gap:.5rem}.rank-table{overflow-x:auto;min-width:600px}}
+/* 页面顶部 h1 已是唯一主标题；隐藏各独立页面内容区重复 h2。 */
+main .min-w-0.flex-1 > section > h2 { display: none; }
+/* 批量录入页头部：删除旧标签，保留标题与右侧操作区的清爽层级。 */
+.record-page .batch-modal > div:first-child > div:first-child > .yellow-tag { display: none; }
+.record-page .batch-modal > div:first-child { align-items: center; padding-bottom: 1.15rem; border-bottom: 1px solid rgba(221,214,254,.8); }
+.record-page .batch-modal > div:first-child h2 { margin-top: 0; }
+.record-page .batch-modal > div:first-child > button { border: 1px solid #d1d5db; background: rgba(255,255,255,.88); }
+
+/* 队员称号与个人档案中的紧凑比赛记录。 */
+.title-list{display:flex;flex-wrap:wrap;gap:.45rem}.title-chip{display:inline-flex;align-items:center;border:1px solid transparent;border-radius:999px;padding:.3rem .62rem;font-size:.74rem;font-weight:800;line-height:1.2}.title-chip.tone-0{background:#fef3c7;border-color:#fbbf24;color:#a16207}.title-chip.tone-1{background:#ede9fe;border-color:#c4b5fd;color:#6d28d9}.title-chip.tone-2{background:#dbeafe;border-color:#93c5fd;color:#1d4ed8}.title-chip.tone-3{background:#dcfce7;border-color:#86efac;color:#15803d}
+.match-record-window{height:11.25rem;overflow-y:auto;padding-right:.35rem;scrollbar-color:#8b5cf6 rgba(237,233,254,.7);scrollbar-width:thin}.match-record-window::-webkit-scrollbar{width:.5rem}.match-record-window::-webkit-scrollbar-track{border-radius:999px;background:rgba(237,233,254,.7)}.match-record-window::-webkit-scrollbar-thumb{border-radius:999px;background:#8b5cf6}.match-record-item{min-height:3.25rem;margin-bottom:.55rem;border-radius:.8rem;background:rgba(255,255,255,.58);padding:.75rem;color:#475569;font-size:.875rem;line-height:1.45}.match-record-item:last-child{margin-bottom:0}
+
+/* 队员档案的好人／狼人出场环形图。 */
+.camp-donut-wrap{display:flex;align-items:center;gap:1rem}.camp-donut{display:grid;height:9.5rem;width:9.5rem;flex:none;place-items:center;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(255,255,255,.75)}.camp-donut>div{display:flex;height:5.7rem;width:5.7rem;flex-direction:column;align-items:center;justify-content:center;border-radius:50%;background:rgba(248,250,252,.92);box-shadow:0 2px 14px rgba(91,33,182,.08)}.camp-donut b{font-size:1.55rem;color:#312e81}.camp-donut span{margin-top:.1rem;color:#7c3aed;font-size:.63rem;font-weight:700}.camp-legend{display:grid;gap:.65rem;font-size:.8rem;color:#475569}.camp-legend p{display:flex;align-items:center;gap:.35rem;margin:0}.camp-legend b{color:#312e81}.camp-legend i{display:inline-block;height:.65rem;width:.65rem;border-radius:50%}.good-dot{background:#8b5cf6}.wolf-dot{background:#f59e0b}
+
+.total-match-tile{display:flex;min-height:9.5rem;flex-direction:column}.mini-camp-donut{display:grid;height:4.8rem;width:4.8rem;place-items:center;align-self:center;border-radius:50%;margin:.25rem 0}.mini-camp-donut>div{display:flex;height:2.95rem;width:2.95rem;flex-direction:column;align-items:center;justify-content:center;border-radius:50%;background:rgba(248,250,252,.94)}.mini-camp-donut b{font-size:1.15rem;color:#312e81}.mini-camp-donut span{font-size:.62rem;color:#7c3aed}.mini-camp-legend{display:flex;justify-content:center;gap:.45rem;color:#64748b;font-size:.62rem;white-space:nowrap}.mini-camp-legend span{display:flex;align-items:center;gap:.18rem}.mini-camp-legend i{display:inline-block;height:.45rem;width:.45rem;border-radius:50%}.radar-labels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.25rem .5rem;margin-top:.25rem;color:#6d28d9;font-size:.68rem}.radar-labels span{white-space:nowrap}
+.radar-axis-label{fill:#6d28d9;font-size:11px;font-weight:800;paint-order:stroke;stroke:rgba(248,250,252,.9);stroke-width:3px;stroke-linejoin:round}
+/* 档案下半区恢复原有紧凑比例，避免比赛记录被推得过远。 */
+@media(min-width:768px){main .p-7.md\:p-10>div:nth-of-type(3){grid-template-columns:210px minmax(0,1fr)!important;gap:1.75rem!important}}
+
+/* 首页阵营胜率条。 */
+.win-track{height:.75rem;overflow:hidden;margin-top:.5rem;border-radius:999px;background:rgba(226,232,240,.78)}.win-bar{display:block;height:100%;border-radius:inherit;transition:width .35s ease}.win-bar.good{background:linear-gradient(90deg,#7c3aed,#d946ef)}.win-bar.wolf{background:linear-gradient(90deg,#facc15,#fb923c)}
+
+/* 三列并排排行榜；每列独立滚动，不会拉长整页。 */
+.leaderboard-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.25rem}.leaderboard-card{min-width:0;overflow:hidden}.leaderboard-head,.leaderboard-row{display:grid;grid-template-columns:2.5rem minmax(0,1fr) auto;align-items:center;gap:.65rem;padding:.85rem 1rem}.leaderboard-head{background:rgba(237,233,254,.55);color:#6d28d9;font-size:.75rem;font-weight:900}.leaderboard-list{max-height:39rem;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#8b5cf6 transparent}.leaderboard-list::-webkit-scrollbar{width:.45rem}.leaderboard-list::-webkit-scrollbar-thumb{border-radius:999px;background:#a78bfa}.leaderboard-row{min-height:4.25rem;border-top:1px solid rgba(237,233,254,.72);transition:background .2s}.leaderboard-row:hover{background:rgba(250,245,255,.78)}.leaderboard-row>i{display:grid;height:2.25rem;width:2.25rem;place-items:center;border-radius:999px;background:#ddd6fe;color:#6d28d9;font-style:normal;font-weight:900}@media(max-width:1100px){.leaderboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:680px){.leaderboard-grid{grid-template-columns:1fr}}
+.mvp-avatar{display:grid;height:1.75rem;width:1.75rem;place-items:center;border-radius:999px;background:#ddd6fe;color:#6d28d9;font-size:.75rem;font-style:normal;font-weight:900}.preferred-board{display:flex;align-items:center;gap:.8rem;border-radius:1rem;background:rgba(255,255,255,.54);padding:1rem}.preferred-board b{color:#312e81}.preferred-board p{margin-top:.25rem;color:#64748b;font-size:.75rem}.board-rank{display:grid;height:2rem;width:2rem;place-items:center;border-radius:999px;background:linear-gradient(135deg,#fef3c7,#facc15);color:#854d0e;font-weight:900}
+.profile-insights>div{min-width:0;border-radius:1rem;background:rgba(237,233,254,.45);padding:1rem}.profile-insights p{color:#7c3aed;font-size:.8rem;font-weight:800}.profile-insights b{display:block;margin-top:.45rem;color:#312e81;font-size:1rem}.profile-insights small{display:block;margin-top:.35rem;color:#64748b;font-size:.72rem}.mini-win-bars{display:grid;gap:.45rem;margin-top:.45rem}.mini-win-bars span{display:grid;grid-template-columns:2.2rem minmax(2rem,1fr) 2.3rem;align-items:center;gap:.35rem;color:#64748b;font-size:.7rem}.mini-win-bars i{height:.45rem;border-radius:999px}.mini-win-bars .good{background:linear-gradient(90deg,#7c3aed,#d946ef)}.mini-win-bars .wolf{background:linear-gradient(90deg,#facc15,#fb923c)}.mini-win-bars b{margin:0;color:#312e81;font-size:.72rem}
+/* 档案洞察与主卡融合，并以可视化阵营胜率替换重复数字。 */
+main .metal-card:has(+ .profile-insights){margin-bottom:0;border-bottom-right-radius:0;border-bottom-left-radius:0}.profile-insights{margin-top:0!important;border-top:0!important;border-top-right-radius:0!important;border-top-left-radius:0!important}.profile-insights:hover{transform:none!important}main .metal-card:has(+ .profile-insights) .p-7.md\:p-10>.mt-8.grid>.stat-tile:nth-child(3),main .metal-card:has(+ .profile-insights) .p-7.md\:p-10>.mt-8.grid>.stat-tile:nth-child(4){display:none}
+.stat-tile small{display:block;margin-top:.35rem;color:#64748b;font-size:.7rem}.seat-table{position:relative;height:15rem;margin:auto;max-width:22rem;border-radius:50%;border:1px dashed rgba(139,92,246,.32)}.seat-node{position:absolute;left:50%;top:50%;display:grid;height:2.55rem;width:2.55rem;place-items:center;border-radius:50%;background:#ddd6fe;color:#5b21b6;font-size:.72rem;font-weight:800;transform:translate(-50%,-50%) rotate(calc(var(--i)*30deg)) translateY(-6.4rem) rotate(calc(var(--i)*-30deg));transition:.2s}.seat-node:nth-of-type(1){--i:0}.seat-node:nth-of-type(2){--i:1}.seat-node:nth-of-type(3){--i:2}.seat-node:nth-of-type(4){--i:3}.seat-node:nth-of-type(5){--i:4}.seat-node:nth-of-type(6){--i:5}.seat-node:nth-of-type(7){--i:6}.seat-node:nth-of-type(8){--i:7}.seat-node:nth-of-type(9){--i:8}.seat-node:nth-of-type(10){--i:9}.seat-node:nth-of-type(11){--i:10}.seat-node:nth-of-type(12){--i:11}.seat-node small{font-size:.55rem}.seat-node.best{background:#22c55e;color:#fff}.seat-node.worst{background:#ef4444;color:#fff}.seat-node.active{scale:1.14}.seat-center{position:absolute;inset:0;display:grid;place-content:center;text-align:center;color:#475569;font-size:.72rem;pointer-events:none}.seat-center b{color:#312e81}.board-list{border-radius:1rem;padding:1rem}.board-list.red{background:rgba(236,253,245,.7)}.board-list.black{background:rgba(254,242,242,.72)}.board-list h3{font-weight:900}.board-list.red h3{color:#15803d}.board-list.black h3{color:#b91c1c}.board-list p{display:flex;justify-content:space-between;gap:1rem;margin-top:.7rem;font-size:.84rem}.board-list span{color:#64748b}
+main .seat-table{height:11rem;max-width:32rem;border-radius:50%;background:radial-gradient(ellipse at center,rgba(255,255,255,.48) 0 45%,transparent 46%)}main .seat-node{height:1.8rem;width:2.2rem;border:1px solid rgba(139,92,246,.45);border-radius:.55rem;background:rgba(237,233,254,.92);transform:translate(-50%,-50%);font-size:.68rem}main .seat-node:nth-of-type(1){left:50%;top:7%}main .seat-node:nth-of-type(2){left:72%;top:13%}main .seat-node:nth-of-type(3){left:88%;top:29%}main .seat-node:nth-of-type(4){left:94%;top:50%}main .seat-node:nth-of-type(5){left:88%;top:71%}main .seat-node:nth-of-type(6){left:72%;top:87%}main .seat-node:nth-of-type(7){left:50%;top:93%}main .seat-node:nth-of-type(8){left:28%;top:87%}main .seat-node:nth-of-type(9){left:12%;top:71%}main .seat-node:nth-of-type(10){left:6%;top:50%}main .seat-node:nth-of-type(11){left:12%;top:29%}main .seat-node:nth-of-type(12){left:28%;top:13%}main .seat-node small{display:none}@media(max-width:560px){main .seat-table{max-width:22rem}main .seat-node{width:1.75rem;font-size:.58rem}}
