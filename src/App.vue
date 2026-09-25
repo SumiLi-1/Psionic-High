@@ -6,7 +6,7 @@ import { supabase } from './lib/supabase'
 import { saveMatchRecords } from './lib/matchRecords'
 import { captureVideoMetadata } from './lib/videoMetadata'
 
-const page=ref('概览'), profile=ref(null), notice=ref(''), loading=ref(true), players=ref([]), records=ref([]), videoMetadata=ref([]), seasonStats=ref([]), campStats=ref([]), scoreTrend=ref([]), radarStats=ref([]), teamBoardStats=ref([]), bestProfiles=ref([]), seasons=ref([]), season=ref(null), overviewSeasonId=ref('all'), rankingSeasonId=ref('all'), playerSearch=ref(''), recordingCode=ref(''), recordingAuthorized=ref(false), recognizingSheet=ref(false), hoverSeat=ref(null)
+const page=ref('概览'), profile=ref(null), notice=ref(''), loading=ref(true), players=ref([]), records=ref([]), videoMetadata=ref([]), seasonStats=ref([]), campStats=ref([]), scoreTrend=ref([]), radarStats=ref([]), teamBoardStats=ref([]), bestProfiles=ref([]), seasons=ref([]), season=ref(null), overviewSeasonId=ref('all'), rankingSeasonId=ref('all'), playerSearch=ref(''), recordingCode=ref(''), recordingAuthorized=ref(false), recognizingSheet=ref(false), hoverSeat=ref(null), entryPage=ref(0)
 const form=ref({seasonId:null,matchDate:'',videoUrl:''})
 const rows=ref([emptyRow()])
 let playerProfilesChannel=null
@@ -64,9 +64,10 @@ const scoreRanked=computed(()=>[...makeMembers(rankingRecords.value)].sort((a,b)
 const winRateRanked=computed(()=>[...makeMembers(rankingRecords.value)].filter(player=>player.matches>0).sort((a,b)=>b.winRate-a.winRate||b.matches-a.matches))
 const mvpRanked=computed(()=>[...makeMembers(rankingRecords.value)].sort((a,b)=>b.mvp-a.mvp||b.points-a.points))
 const filteredMembers=computed(()=>members.value.filter(player=>((player.name||'')+(player.id||'')).toLowerCase().includes(playerSearch.value.trim().toLowerCase())))
-function emptyRow(){return {player:'',role:'',camp:'',result:'',score:0,board_type:'',seat_number:'',vote_wolf_count:0,vote_score:0,behavior_score:0,mvp_score:0,svp_score:0,scapegoat_score:0,remarks:''}}
-function addRow(){rows.value.push(emptyRow())}
-function removeRow(index){if(rows.value.length>1)rows.value.splice(index,1)}
+function emptyRow(){return {player:'',role:'',result:'',score:0,seat_number:'',vote_wolf_count:0,vote_score:0,behavior_score:0,title:'无',remarks:''}}
+const currentEntryRow=computed(()=>rows.value[entryPage.value]||rows.value[0])
+function addRow(){rows.value.push(emptyRow());entryPage.value=rows.value.length-1}
+function removeRow(index){if(rows.value.length>1){rows.value.splice(index,1);entryPage.value=Math.min(entryPage.value,rows.value.length-1)}}
 const profileRecords=computed(()=>profile.value?records.value.filter(row=>row.player_id===profile.value.id):[])
 const profileRadar=computed(()=>{
   const rows=radarStats.value.filter(stat=>stat.player_id===profile.value?.id)
@@ -133,13 +134,13 @@ async function loadData(){
 async function submit(){
   if(!recordingAuthorized.value){notice.value='请先输入正确的录入码。';return}
   if(!form.value.seasonId){notice.value='没有可用赛季，暂时无法写入对局。';return}
-  if(rows.value.some(row=>!row.player||!row.role||!row.camp||!row.result)){notice.value='请完整填写每一行的队员、身份、阵营和结果。';return}
+  if(rows.value.some(row=>!row.player||!row.role||!row.result)){notice.value='请完整填写每一行的队员、身份和结果。';return}
   try{
     const videoUrl=form.value.videoUrl
     await saveMatchRecords({rows:rows.value,seasonId:form.value.seasonId,matchDate:form.value.matchDate||new Date().toISOString().slice(0,10),videoUrl,code:recordingCode.value})
     let metadataWarning=''
     if(videoUrl){try{await captureVideoMetadata(videoUrl)}catch(error){metadataWarning='录像已保存，但暂时无法获取 B 站封面和标题。'}}
-    notice.value='对局已写入数据库。'+metadataWarning; rows.value=[emptyRow()]; form.value.videoUrl=''; await loadData(); page.value='概览'
+    notice.value='对局已写入数据库。'+metadataWarning; rows.value=[emptyRow()]; entryPage.value=0; form.value.videoUrl=''; await loadData(); page.value='概览'
   }catch(error){notice.value=error.message}
 }
 async function authorizeRecording(){
@@ -176,6 +177,9 @@ onUnmounted(()=>{if(playerProfilesChannel&&supabase)supabase.removeChannel(playe
         <nav class="mt-20 space-y-3"><button v-for="[name,icon] in nav" :key="name" class="nav-button" :class="page===name?'nav-active':''" @click="profile=null;page=name"><component :is="icon" :size="21"/>{{ name }}</button></nav>
         <div class="mt-auto rounded-2xl border border-yellow-200/70 bg-yellow-100/40 p-4 text-sm"><p class="font-bold text-yellow-700">{{ seasonName }}</p><p class="mt-1 text-xs text-slate-500">数据来自战队数据库</p></div>
       </aside>
+      <nav class="mobile-nav lg:hidden" aria-label="主导航">
+        <button v-for="[name,icon] in nav" :key="name" :class="{active:page===name&&!profile}" @click="profile=null;page=name"><component :is="icon" :size="20"/><span>{{ name }}</span></button>
+      </nav>
       <section class="min-w-0 flex-1 px-5 py-7 md:px-10">
         <header class="flex items-center justify-between"><div><p class="text-sm font-medium text-violet-500">{{ seasonName }} · 战队数据中心</p><h1 class="chrome-title mt-1 text-3xl font-black md:text-4xl">{{ profile ? profile.name : page }}</h1></div><button class="metal-button" @click="profile=null;page='对局录入'">+ 录入对局</button></header>
         <p v-if="notice" class="mt-4 rounded-xl bg-yellow-100 px-4 py-3 text-sm text-yellow-800">{{ notice }}</p>
@@ -189,12 +193,12 @@ onUnmounted(()=>{if(playerProfilesChannel&&supabase)supabase.removeChannel(playe
                 <div class="title-list"><span v-for="(title,index) in profile.titles||[]" :key="title" :class="titleTone(index)">{{ title }}</span></div>
                 <h2 class="chrome-title mt-5 text-5xl font-black">{{ profile.name }}</h2>
                 <p class="mt-2 text-violet-600">常用身份：{{ profile.roles.length ? profile.roles.join(' · ') : '—' }}</p>
-                <div class="best-profile-tags mt-3"><span class="best-tag">擅长版型 · {{ profileBest.best_board }}</span><span class="best-tag">擅长身份 · {{ profileBest.best_role }}</span></div>
-                <div class="mt-7 grid gap-3 md:grid-cols-[.8fr_1.2fr]">
-                  <div class="profile-summary-card total-only-card"><div><p>总积分</p><b class="profile-score">{{ profile.points }}</b><small>日均 {{ profileDailyScore.toFixed(1) }} 分 · {{ profileDays }} 天</small></div><div><p>总场数</p><div class="mini-camp-donut" :style="campDonutStyle(profile)"><div><b>{{ profile.matches }}</b><span>场</span></div></div><div class="mini-camp-legend"><span><i class="good-dot"></i>好人 {{ profile.goodMatches }}</span><span><i class="wolf-dot"></i>狼人 {{ profile.wolfMatches }}</span></div></div></div>
-                  <div class="profile-summary-card score-camp-card"><div><p>阵营胜率</p><div class="mini-win-bars"><span>好人 <i class="good" :style="{width:profile.good+'%'}"></i><b>{{ profile.good }}%</b></span><span>狼人 <i class="wolf" :style="{width:profile.wolf+'%'}"></i><b>{{ profile.wolf }}%</b></span></div></div><div class="honor-stats honor-stats-horizontal"><div><p>MVP 次数</p><b>{{ profile.mvp }}</b></div><div><p>SVP 次数</p><b>{{ profile.svp }}</b></div></div></div>
+                <div class="best-profile-tags mt-3"><span class="best-tag best-board">擅长版型 · {{ profileBest.best_board }} · {{ profileBest.best_board_win_rate }}% · {{ profileBest.best_board_games }} 局</span><span class="best-tag best-role">擅长身份 · {{ profileBest.best_role }} · {{ profileBest.best_role_win_rate }}%</span></div>
+                <div class="profile-dashboard mt-6">
+                  <div class="dashboard-score"><div><p>总积分</p><b>{{ profile.points }}</b><div class="score-meta"><div><p>日均积分</p><strong>{{ profileDailyScore.toFixed(1) }} 分</strong></div><div><p>比赛日</p><strong>{{ profileDays }} 天</strong></div></div></div><div class="dashboard-games"><div><p>总场数</p><div class="mini-camp-donut" :style="campDonutStyle(profile)"><div><b>{{ profile.matches }}</b><span>场</span></div></div></div><div class="mini-camp-legend"><span><i class="good-dot"></i>好人 {{ profile.goodMatches }}</span><span><i class="wolf-dot"></i>狼人 {{ profile.wolfMatches }}</span></div></div></div>
+                  <div class="dashboard-performance"><div><p>阵营胜率</p><div class="mini-win-bars"><span>好人 <i class="good" :style="{width:profile.good+'%'}"></i><b>{{ profile.good }}%</b></span><span>狼人 <i class="wolf" :style="{width:profile.wolf+'%'}"></i><b>{{ profile.wolf }}%</b></span></div></div><div class="dashboard-honors"><div><p>MVP 次数</p><b>{{ profile.mvp }}</b></div><div><p>SVP 次数</p><b>{{ profile.svp }}</b></div></div></div>
                 </div>
-                <div class="mt-8 grid gap-7 md:grid-cols-[230px_minmax(0,1fr)]"><div><p class="font-bold text-violet-950">◎ 战力雷达图</p><svg viewBox="-35 -20 270 220" class="mt-2 w-60"><g v-for="level in [2,4,6,8,10]" :key="level" fill="none" stroke="#3f3f46" opacity=".48"><polygon :points="radarGrid(level*10)"/></g><polygon :points="radarPoints(profileRadar)" fill="rgba(139,92,246,.35)" stroke="#a855f7" stroke-width="2"/><g class="radar-axis-label"><text x="100" y="8" text-anchor="middle">带队能力 {{ profileRadar.leadership }}</text><text x="171" y="73">轮次操作 {{ profileRadar.operation }}</text><text x="151" y="171">逆风抗压 {{ profileRadar.resilience }}</text><text x="49" y="171" text-anchor="end">得分能力 {{ profileRadar.scoring }}</text><text x="29" y="73" text-anchor="end">站边投狼 {{ profileRadar.vote_wolf }}</text></g></svg></div><div><div class="flex items-center justify-between"><p class="font-bold text-violet-950">比赛记录</p><span class="text-xs text-violet-500">共 {{ profileRecords.length }} 条</span></div><div v-if="profileRecords.length" class="match-record-window mt-3"><div v-for="record in profileRecords" :key="record.id" class="match-record-item">{{ seasonLabel(record.season_id) }} · {{ record.match_date||'未填写日期' }} · {{ record.role||'—' }} · {{ record.result||'—' }} · {{ record.score||0 }} 分</div></div><p v-else class="mt-3 rounded-xl bg-white/50 p-3 text-sm text-slate-500">暂无比赛记录。</p></div></div>
+                <div class="mt-6 grid gap-7 md:grid-cols-[230px_minmax(0,1fr)]"><div><p class="font-bold text-violet-950">◎ 战力雷达图</p><svg viewBox="-35 -20 270 220" class="mt-2 w-60"><g v-for="level in [2,4,6,8,10]" :key="level" fill="none" stroke="#3f3f46" opacity=".48"><polygon :points="radarGrid(level*10)"/></g><polygon :points="radarPoints(profileRadar)" fill="rgba(139,92,246,.35)" stroke="#a855f7" stroke-width="2"/><g class="radar-axis-label"><text x="100" y="8" text-anchor="middle">带队能力 {{ profileRadar.leadership }}</text><text x="171" y="73">轮次操作 {{ profileRadar.operation }}</text><text x="151" y="171">逆风抗压 {{ profileRadar.resilience }}</text><text x="49" y="171" text-anchor="end">得分能力 {{ profileRadar.scoring }}</text><text x="29" y="73" text-anchor="end">站边投狼 {{ profileRadar.vote_wolf }}</text></g></svg></div><div><div class="flex items-center justify-between"><p class="font-bold text-violet-950">比赛记录</p><span class="text-xs text-violet-500">共 {{ profileRecords.length }} 条</span></div><div v-if="profileRecords.length" class="match-record-window mt-3"><component v-for="record in profileRecords" :key="record.id" :is="record.video_url?'a':'div'" :href="record.video_url||undefined" :target="record.video_url?'_blank':undefined" :rel="record.video_url?'noreferrer':undefined" class="match-record-item" :class="record.video_url?'match-record-link':''"><span>{{ seasonLabel(record.season_id) }} · {{ record.match_date||'未填写日期' }} · {{ record.role||'—' }} · {{ record.result||'—' }} · {{ record.score||0 }} 分</span><em v-if="record.video_url">观看录像 ↗</em></component></div><p v-else class="mt-3 rounded-xl bg-white/50 p-3 text-sm text-slate-500">暂无比赛记录。</p></div></div>
               </div>
               <div class="relative min-h-[420px] bg-gradient-to-br from-violet-200 via-white to-yellow-100"><img v-if="profile.portrait_path" :src="profile.portrait_path" class="absolute inset-0 h-full w-full object-cover object-top"/><div v-else class="grid h-full place-items-center"><div class="grid h-36 w-36 place-items-center rounded-full bg-white/60 text-6xl font-black text-violet-300">{{ profile.name.slice(0,1) }}</div><span class="absolute bottom-8 yellow-tag">暂无半身照</span></div></div>
             </div>
@@ -224,7 +228,50 @@ onUnmounted(()=>{if(playerProfilesChannel&&supabase)supabase.removeChannel(playe
         </template>
 
         <template v-else-if="page==='对局录入'">
-          <section class="metal-card mt-8 p-6"><div v-if="!recordingAuthorized" class="mx-auto max-w-md py-8 text-center"><h2 class="chrome-title text-2xl font-black">对局录入权限</h2><p class="mt-2 text-sm text-violet-500">输入录入码后才可上传、编辑和写入对局数据。</p><div class="mt-5 flex gap-3"><input v-model="recordingCode" class="archive-search flex-1" type="password" placeholder="输入录入码" @keyup.enter="authorizeRecording"/><button type="button" class="metal-button" @click="authorizeRecording">开启录入</button></div></div><form v-else @submit.prevent="submit"><div class="flex flex-wrap items-center justify-between gap-3"><div><h2 class="chrome-title text-2xl font-black">批量录入对局</h2><p class="mt-1 text-sm text-violet-500">可上传每日计分表自动预填三局，再逐项校对。</p></div><div class="flex gap-2"><label class="add-row cursor-pointer"><input class="hidden" type="file" accept="image/png,image/jpeg,image/webp" @change="recognizeSheet"/>{{ recognizingSheet?'正在识别…':'上传计分表识别' }}</label><button type="button" class="rounded-xl bg-white/60 px-3 py-2 text-sm" @click="loadData">刷新队员</button></div></div><div class="mt-5 grid gap-4 md:grid-cols-2"><label class="field">对局日期<input v-model="form.matchDate" type="date"/></label><label class="field">录像链接（可选）<input v-model="form.videoUrl" type="url" placeholder="https://..."/></label></div><p class="mt-3 text-xs text-violet-500">图片识别会自动按身份填写阵营；胜负分为 5 识别为胜利、为 0 识别为失败。投狼数请人工核对。</p><div class="table-wrap mt-6"><table><thead><tr><th>队员</th><th>局号</th><th>身份</th><th>阵营</th><th>结果</th><th>得分</th><th>座位</th><th>投狼数</th><th>投票分</th><th>行为分</th><th>MVP</th><th>SVP</th><th>背锅</th><th>备注</th><th></th></tr></thead><tbody><tr v-for="(row,index) in rows" :key="index"><td><select v-model="row.player"><option value="">选择队员</option><option v-for="player in players" :key="player.id" :value="player.name">{{ player.name }}</option></select></td><td><input v-model="row.board_type" placeholder="第一局"/></td><td><input v-model="row.role" placeholder="如：预言家"/></td><td><select v-model="row.camp"><option value="">选择</option><option>好人</option><option>狼队</option></select></td><td><select v-model="row.result"><option value="">选择</option><option>胜利</option><option>失败</option></select></td><td><input v-model.number="row.score" type="number" step="any" inputmode="decimal"/></td><td><input v-model.number="row.seat_number" type="number" min="1"/></td><td><input v-model.number="row.vote_wolf_count" type="number" min="0"/></td><td><input v-model.number="row.vote_score" type="number" step="any"/></td><td><input v-model.number="row.behavior_score" type="number" step="any"/></td><td><input v-model.number="row.mvp_score" type="number" step="any"/></td><td><input v-model.number="row.svp_score" type="number" step="any"/></td><td><input v-model.number="row.scapegoat_score" type="number" step="any"/></td><td><input v-model="row.remarks" placeholder="可选"/></td><td><button type="button" class="remove-row" :disabled="rows.length===1" @click="removeRow(index)">×</button></td></tr></tbody></table></div><div class="mt-5 flex gap-3"><button type="button" class="add-row" @click="addRow">+ 添加一条记录</button><button class="metal-button">提交 {{ rows.length }} 条记录</button></div></form></section>
+          <section class="metal-card mt-8 p-6">
+            <div v-if="!recordingAuthorized" class="mx-auto max-w-md py-8 text-center">
+              <h2 class="chrome-title text-2xl font-black">对局录入权限</h2>
+              <p class="mt-2 text-sm text-violet-500">输入录入码后才可上传、编辑和写入对局数据。</p>
+              <div class="mt-5 flex gap-3"><input v-model="recordingCode" class="archive-search flex-1" type="password" placeholder="输入录入码" @keyup.enter="authorizeRecording"/><button type="button" class="metal-button" @click="authorizeRecording">开启录入</button></div>
+            </div>
+            <form v-else @submit.prevent="submit">
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <div><h2 class="chrome-title text-2xl font-black">批量录入对局</h2><p class="mt-1 text-sm text-violet-500">阵营由身份自动识别；本局称号会自动换算对应分数。</p></div>
+                <div class="flex gap-2"><label class="add-row cursor-pointer"><input class="hidden" type="file" accept="image/png,image/jpeg,image/webp" @change="recognizeSheet"/>{{ recognizingSheet?'正在识别…':'上传计分表识别' }}</label><button type="button" class="rounded-xl bg-white/60 px-3 py-2 text-sm" @click="loadData">刷新队员</button></div>
+              </div>
+              <div class="mt-5 grid gap-4 md:grid-cols-2"><label class="field">对局日期<input v-model="form.matchDate" type="date"/></label><label class="field">录像链接（可选）<input v-model="form.videoUrl" type="url" placeholder="https://..."/></label></div>
+              <p class="mt-3 text-xs text-violet-500">胜负选择会直接写入；本局称号：MVP +2 分、SVP +1.5 分、背锅 −1 分。</p>
+              <section class="entry-sheet mt-6" aria-label="本条对局记录">
+                <div class="entry-sheet-head">
+                  <div><span class="entry-kicker">本条记录</span><b>第 {{ entryPage+1 }} 条</b></div>
+                  <div v-if="rows.length>1" class="entry-pagination">
+                    <button type="button" :disabled="entryPage===0" @click="entryPage--">上一条</button>
+                    <span>{{ entryPage+1 }} / {{ rows.length }}</span>
+                    <button type="button" :disabled="entryPage===rows.length-1" @click="entryPage++">下一条</button>
+                  </div>
+                </div>
+                <div class="entry-major-grid">
+                  <label class="entry-field entry-primary">队员<select v-model="currentEntryRow.player"><option value="">选择队员</option><option v-for="player in players" :key="player.id" :value="player.name">{{ player.name }}</option></select></label>
+                  <label class="entry-field entry-primary">身份<input v-model="currentEntryRow.role" placeholder="如：预言家"/></label>
+                  <label class="entry-field entry-primary">结果<select v-model="currentEntryRow.result"><option value="">选择结果</option><option>胜利</option><option>失败</option></select></label>
+                  <label class="entry-field">本局称号<select v-model="currentEntryRow.title"><option>无</option><option>MVP</option><option>SVP</option><option>背锅</option></select></label>
+                </div>
+                <div class="entry-number-grid">
+                  <label class="entry-field">得分<input v-model.number="currentEntryRow.score" type="number" step="any" inputmode="decimal"/></label>
+                  <label class="entry-field">座位<input v-model.number="currentEntryRow.seat_number" type="number" min="1"/></label>
+                  <label class="entry-field">投狼数<input v-model.number="currentEntryRow.vote_wolf_count" type="number" min="0"/></label>
+                  <label class="entry-field">投票分<input v-model.number="currentEntryRow.vote_score" type="number" step="any"/></label>
+                  <label class="entry-field">行为分<input v-model.number="currentEntryRow.behavior_score" type="number" step="any"/></label>
+                  <label class="entry-field entry-remarks">备注<input v-model="currentEntryRow.remarks" placeholder="可选"/></label>
+                </div>
+                <div class="entry-sheet-foot">
+                  <span>阵营会按身份自动生成</span>
+                  <button type="button" class="remove-row" :disabled="rows.length===1" @click="removeRow(entryPage)">删除本条</button>
+                </div>
+              </section>
+              <div class="mt-5 flex gap-3"><button type="button" class="add-row" @click="addRow">+ 添加一条记录</button><button class="metal-button">提交 {{ rows.length }} 条记录</button></div>
+            </form>
+          </section>
         </template>
       </section>
     </div>

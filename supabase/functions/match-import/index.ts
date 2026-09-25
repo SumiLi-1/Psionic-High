@@ -16,20 +16,24 @@ function assertCode(code: unknown) {
 function normalizeRow(row: Record<string, unknown>) {
   const role = String(row.role ?? '').trim()
   const winScore = asNumber(row.win_score)
+  const title = String(row.title ?? '').trim()
+  const result = row.result === '胜利' || row.result === '失败'
+    ? row.result
+    : winScore === 5 ? '胜利' : '失败'
   return {
     player: String(row.player ?? row.player_name ?? '').trim(),
     role,
     camp: wolfRoles.has(role) ? '狼队' : '好人',
-    result: winScore === 5 ? '胜利' : '失败',
+    result,
     score: asNumber(row.score),
     board_type: row.board_type ? String(row.board_type) : null,
     seat_number: row.seat_number ? Math.trunc(asNumber(row.seat_number)) : null,
     vote_wolf_count: Math.trunc(asNumber(row.vote_wolf_count)),
     vote_score: asNumber(row.vote_score),
     behavior_score: asNumber(row.behavior_score),
-    mvp_score: asNumber(row.mvp_score),
-    svp_score: asNumber(row.svp_score),
-    scapegoat_score: asNumber(row.scapegoat_score),
+    mvp_score: title === 'MVP' ? 2 : asNumber(row.mvp_score),
+    svp_score: title === 'SVP' ? 1.5 : asNumber(row.svp_score),
+    scapegoat_score: title === '背锅' ? -1 : asNumber(row.scapegoat_score),
     remarks: row.remarks ? String(row.remarks) : null,
   }
 }
