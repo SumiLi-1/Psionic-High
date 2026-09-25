@@ -173,7 +173,7 @@ onUnmounted(()=>{if(playerProfilesChannel&&supabase)supabase.removeChannel(playe
   <main class="min-h-screen text-slate-800">
     <div class="relative mx-auto flex min-h-screen max-w-[1500px]">
       <aside class="hidden w-72 shrink-0 border-r border-white/70 bg-white/35 px-7 py-9 backdrop-blur-xl lg:flex lg:flex-col">
-        <div class="flex items-center gap-3"><img :src="logo" class="h-16 w-16 rounded-full border-2 border-yellow-200 object-cover shadow-lg"/><div><b class="text-xl text-violet-950">超能高校</b><p class="mt-1 text-xs tracking-[.2em] text-violet-500">CHAO NENG</p></div></div>
+        <div class="flex items-center gap-3"><img :src="logo" class="h-16 w-16 rounded-full border-2 border-yellow-200 object-cover shadow-lg"/><div><b class="text-xl text-violet-950">超能高校</b><p class="mt-1 text-xs tracking-[.2em] text-violet-500">PSIONIC HIGH</p></div></div>
         <nav class="mt-20 space-y-3"><button v-for="[name,icon] in nav" :key="name" class="nav-button" :class="page===name?'nav-active':''" @click="profile=null;page=name"><component :is="icon" :size="21"/>{{ name }}</button></nav>
         <div class="mt-auto rounded-2xl border border-yellow-200/70 bg-yellow-100/40 p-4 text-sm"><p class="font-bold text-yellow-700">{{ seasonName }}</p><p class="mt-1 text-xs text-slate-500">数据来自战队数据库</p></div>
       </aside>
